@@ -85,8 +85,8 @@ fi
 
 TAG="$VERSION" TAG_LATEST="$TAG_LATEST"
 
-echo "TAG=$TAG" >> $GITHUB_OUTPUT
-echo "TAG_LATEST=$TAG_LATEST" >> $GITHUB_OUTPUT
+echo "TAG=$TAG" >> $GITHUB_ENV
+echo "TAG_LATEST=$TAG_LATEST" >> $GITHUB_ENV
 
 # Debugging info
 echo "Highest tag found: $HIGHEST"
