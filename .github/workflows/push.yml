@@ -49,7 +49,7 @@ jobs:
     - name: DockerMeta
       id: docker-meta
       run: |
-        if [ ${{ steps.docker-tags.outputs.TAG_LATEST == true }} ] || if [ ${{ steps.docker-tags.outputs.TAG_LATEST == "true" }} ]
+        if [ ${{ steps.docker-tags.outputs.TAG_LATEST == true }} ]
         then
           echo "TAGS=ghcr.io/${{ github.repository }}:${{ env.TAG }},ghcr.io/${{ github.repository }}:latest" >> $GITHUB_OUTPUT
         fi
