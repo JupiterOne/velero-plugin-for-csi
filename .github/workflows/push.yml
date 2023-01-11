@@ -52,7 +52,6 @@ jobs:
         if [ ${{ steps.docker-tags.outputs.TAG_LATEST == true }} ]
         then
           echo 'TAGS=ghcr.io/${{ github.repository }}:${{ env.TAG }},ghcr.io/${{ github.repository }}:latest' >> $GITHUB_OUTPUT
-        fi
         else
           echo 'TAGS=ghcr.io/${{ github.repository }}:${{ env.TAG }}' >> $GITHUB_OUTPUT
         fi    
