@@ -19,6 +19,7 @@
 # The highest, non-prerelease semantic version will also be given the `latest` tag.
 
 set +x
+set -e
 
 if [[ -z "$CI" ]]; then
     echo "This script is intended to be run only on Github Actions." >&2
