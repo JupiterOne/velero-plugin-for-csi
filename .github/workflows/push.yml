@@ -8,6 +8,12 @@ on:
     tags:
       - '*'
 
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}      
+
 jobs:
 
   build:
@@ -49,37 +55,32 @@ jobs:
     - name: Test
       run: make test
 
-    # Sets the steps output variables: TAG and TAG_LATEST for use by the docker meta step
-    - name: DockerTags
-      id: docker-tags
-      run: |
-        source ./hack/docker-tags.sh
-
-    # Sets an output variable: TAGS with the constructed docker tags
-    - name: DockerMeta
-      id: docker-meta
-      run: |
-        if [ ${{ steps.docker-tags.outputs.TAG_LATEST == true }} ]
-        then
-          echo 'TAGS=ghcr.io/${{ github.repository }}:${{ env.TAG }},ghcr.io/${{ github.repository }}:latest' >> $GITHUB_OUTPUT
-        else
-          echo 'TAGS=ghcr.io/${{ github.repository }}:${{ env.TAG }}' >> $GITHUB_OUTPUT
-        fi    
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=sha    
 
     - name: Log in to the Container registry
       uses: docker/login-action@v2
       with:
-        registry: ghcr.io
+        registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}        
 
     - name: Build and push
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v3
       with:
         context: .
         platforms: linux/amd64,linux/arm64
         push: true
-        tags: ${{ steps.docker-meta.outputs.TAGS }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
 
     # Only try to publish the container image from the root repo; forks don't have permission to do so and will always get failures.
     - name: Publish container image
