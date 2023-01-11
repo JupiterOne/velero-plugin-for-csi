@@ -19,7 +19,6 @@
 # The highest, non-prerelease semantic version will also be given the `latest` tag.
 
 set +x
-set -e
 
 if [[ -z "$CI" ]]; then
     echo "This script is intended to be run only on Github Actions." >&2
@@ -51,11 +50,16 @@ function highest_release() {
 triggeredBy=$(echo $GITHUB_REF | cut -d / -f 2)
 if [[ "$triggeredBy" == "heads" ]]; then
     BRANCH=$(echo $GITHUB_REF | cut -d / -f 3)
-    TAG=
+    TAG=$BRANCH
 elif [[ "$triggeredBy" == "tags" ]]; then
-    BRANCH=
+    BRANCH=$BRANCH
     TAG=$(echo $GITHUB_REF | cut -d / -f 3)
 fi
+
+echo "GITHUB_REF: $GITHUB_REF"
+echo "triggeredBy: $triggeredBy"
+echo "BRANCH: $BRANCH"
+echo "TAG: $TAG"
 
 TAG_LATEST=false
 if [[ ! -z "$TAG" ]]; then
@@ -66,7 +70,9 @@ if [[ ! -z "$TAG" ]]; then
     git fetch --tags
     # Calculate the latest release if there's a tag.
     highest_release
-    if [[ "$TAG" == "$HIGHEST" ]]; then
+    echo "Hello world!"
+    if [[ "$TAG" == "$HIGHEST" ]] || [[ "$BRANCH" == "main" ]]
+    then
       TAG_LATEST=true
     fi
 else
