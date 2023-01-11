@@ -60,7 +60,7 @@ _output/bin/$(GOOS)/$(GOARCH)/$(BIN): build-dirs
 
 TTY := $(shell tty -s && echo "-t")
 
-shell: build-dirs 
+shell: build-dirs
 	@echo "running docker: $@"
 	@docker run \
 		-e GOFLAGS \
@@ -85,16 +85,15 @@ build-dirs:
 
 .PHONY: container
 container: all build-dirs
-	cp Dockerfile _output/bin/$(GOOS)/$(GOARCH)/Dockerfile
-	docker build -t $(IMAGE) -f _output/bin/$(GOOS)/$(GOARCH)/Dockerfile _output/bin/$(GOOS)/$(GOARCH)
+	docker buildx build -f Dockerfile -t $(IMAGE) --platform linux/amd64,linux/arm64 .
+	docker buildx build --load -t $(IMAGE) --platform $(GOOS)/$(GOARCH) .
 
 .PHONY: push
 push: container
 ifeq ($(TAG_LATEST), true)
-	docker tag $(IMAGE_NAME):$(TAG) $(IMAGE_NAME):latest
-	docker push $(IMAGE_NAME):latest
+	docker buildx build --push --platform linux/arm64,linux/amd64 -t $(IMAGE_NAME):latest .
 endif
-	docker push $(IMAGE)
+	docker buildx build --push --platform linux/arm64,linux/amd64 -t $(IMAGE) .
 
 .PHONY: all-ci
 all-ci: $(addprefix ci-, $(BIN))
